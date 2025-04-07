@@ -43,39 +43,6 @@ public class CodingDbUtility {
     private void loadknowledge()
     {
 
-        /* Load CodeMaster Map */
-        List<CodeMaster> codeMasterList = codeMasterRepository.findAll();
-        codeMasterMap.clear();
-        codeMasterMap.putAll(codeMasterList.stream()
-                .collect(Collectors.toMap(CodeMaster::getId, CodeMaster::getCode)));
-
-
-        /* Load labsMaster Map */
-        List<LabsMaster> labsMasterList = labsMasterRepository.findAll();
-        labsMasterMap.clear();
-        labsMasterMap.putAll(labsMasterList.stream().collect(Collectors.toMap(LabsMaster::getId, LabsMaster::getLabs)));
-
-
-        /* Load treatmentOrPlanMasterMap Map */
-        List<TreatmentOrPlanMaster> treatmentOrPlanMasterList = treatmentOrPlanMasterRepository.findAll();
-        treatmentOrPlanMasterMap.clear();
-        treatmentOrPlanMasterMap.putAll(treatmentOrPlanMasterList.stream()
-                .collect(Collectors.toMap(TreatmentOrPlanMaster::getId, TreatmentOrPlanMaster::getTreatmentOrPlan)));
-
-
-        /* Load medicationsMasterMap Map */
-        List<MedicationsMaster> medicationsMasterList = medicationsMasterRepository.findAll();
-        medicationsMasterMap.clear();
-        medicationsMasterMap.putAll(medicationsMasterList.stream()
-                .collect(Collectors.toMap(MedicationsMaster::getId, MedicationsMaster::getMedications)));
-
-
-        /* Load physicalExamMasterMap Map */
-        List<PhysicalExamMaster> physicalExamMasterList = physicalExamMasterRepository.findAll();
-        physicalExamMasterMap.clear();
-        physicalExamMasterMap.putAll(physicalExamMasterList.stream()
-                .collect(Collectors.toMap(PhysicalExamMaster::getId , PhysicalExamMaster::getPhysicalExam)));
-
         /* Load MajorMaster Map */
         List<MajorMaster> majorMasterList = majorMasterRepository.findAll();
 
@@ -93,27 +60,57 @@ public class CodingDbUtility {
 
     public Map<Integer, String> getCodeMasterMap()
     {
+
+        /* Load CodeMaster Map */
+        List<CodeMaster> codeMasterList = codeMasterRepository.findAll();
+        codeMasterMap.clear();
+        codeMasterMap.putAll(codeMasterList.stream()
+                .collect(Collectors.toMap(CodeMaster::getId, CodeMaster::getCode)));
+
         return this.codeMasterMap;
     }
 
     public Map<Integer, String> getLabsMasterMap()
     {
+        /* Load labsMaster Map */
+        List<LabsMaster> labsMasterList = labsMasterRepository.findAll();
+        labsMasterMap.clear();
+        labsMasterMap.putAll(labsMasterList.stream().collect(Collectors.toMap(LabsMaster::getId, LabsMaster::getLabs)));
+
         return this.labsMasterMap;
     }
 
     public Map<Integer, String> getPhysicalExamMasterMap()
     {
+        /* Load physicalExamMasterMap Map */
+        List<PhysicalExamMaster> physicalExamMasterList = physicalExamMasterRepository.findAll();
+        physicalExamMasterMap.clear();
+        physicalExamMasterMap.putAll(physicalExamMasterList.stream()
+                .collect(Collectors.toMap(PhysicalExamMaster::getId , PhysicalExamMaster::getPhysicalExam)));
+
         return this.physicalExamMasterMap;
     }
 
 
     public Map<Integer, String> getMedicationsMasterMap()
     {
+        /* Load medicationsMasterMap Map */
+        List<MedicationsMaster> medicationsMasterList = medicationsMasterRepository.findAll();
+        medicationsMasterMap.clear();
+        medicationsMasterMap.putAll(medicationsMasterList.stream()
+                .collect(Collectors.toMap(MedicationsMaster::getId, MedicationsMaster::getMedications)));
+
         return this.medicationsMasterMap;
     }
 
     public Map<Integer, String> getTreatmentOrPlanMasterMap()
     {
+        /* Load treatmentOrPlanMasterMap Map */
+        List<TreatmentOrPlanMaster> treatmentOrPlanMasterList = treatmentOrPlanMasterRepository.findAll();
+        treatmentOrPlanMasterMap.clear();
+        treatmentOrPlanMasterMap.putAll(treatmentOrPlanMasterList.stream()
+                .collect(Collectors.toMap(TreatmentOrPlanMaster::getId, TreatmentOrPlanMaster::getTreatmentOrPlan)));
+
         return this.treatmentOrPlanMasterMap;
     }
 
