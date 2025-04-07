@@ -7,7 +7,6 @@ import com.example.Redesign.Repository.*;
 import com.example.Redesign.request.GroupRequest;
 import com.example.Redesign.request.SelectedItem;
 import com.example.Redesign.utility.CodingDbUtility;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,15 +32,6 @@ public class MajorService {
     private  Map<Integer, String> treatmentOrPlanMasterMap = new HashMap<>();
     private  Map<Integer, String> codeMasterMap = new HashMap<>();
 
-    @PostConstruct
-    public void loadknowledge()
-    {
-        this.labsMasterMap = codingDbUtility.getLabsMasterMap();
-        this.treatmentOrPlanMasterMap = codingDbUtility.getTreatmentOrPlanMasterMap();
-        this.medicationsMasterMap = codingDbUtility.getMedicationsMasterMap();
-        this.physicalExamMasterMap = codingDbUtility.getPhysicalExamMasterMap();
-        this.codeMasterMap = codingDbUtility.getCodeMasterMap();
-    }
 
     public List<CodeGroupResponse> getGroupsForCodeId(int codeId)
     {
@@ -85,6 +75,12 @@ public class MajorService {
 
     public String getCategoryText(String categoryType, Integer categoryId)
     {
+        this.labsMasterMap = codingDbUtility.getLabsMasterMap();
+        this.treatmentOrPlanMasterMap = codingDbUtility.getTreatmentOrPlanMasterMap();
+        this.medicationsMasterMap = codingDbUtility.getMedicationsMasterMap();
+        this.physicalExamMasterMap = codingDbUtility.getPhysicalExamMasterMap();
+        this.codeMasterMap = codingDbUtility.getCodeMasterMap();
+
         String ans;
         switch (categoryType)
         {
