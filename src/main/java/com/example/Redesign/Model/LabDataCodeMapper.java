@@ -4,7 +4,7 @@ package com.example.Redesign.Model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "labdata_code_mapper", schema = "prospective_coding_db_redesign")
+@Table(name = "labdata_code_mapper")
 public class LabDataCodeMapper {
 
     @Id
