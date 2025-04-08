@@ -6,14 +6,14 @@ import com.example.Redesign.DTO.MasterDataItem;
 public class TextToCUIRequest {
 
     private String type;
-    private MasterDataItem item;
+    private MasterDataItem masterDataItem;
 
     public TextToCUIRequest() {
     }
 
     public TextToCUIRequest(String type, MasterDataItem item) {
         this.type = type;
-        this.item = item;
+        this.masterDataItem = item;
     }
 
     public String getType() {
@@ -24,11 +24,11 @@ public class TextToCUIRequest {
         this.type = type;
     }
 
-    public MasterDataItem getItem() {
-        return item;
+    public MasterDataItem getMasterDataItem() {
+        return masterDataItem;
     }
 
-    public void setItem(MasterDataItem item) {
-        this.item = item;
+    public void setMasterDataItem(MasterDataItem item) {
+        this.masterDataItem = item;
     }
 }
