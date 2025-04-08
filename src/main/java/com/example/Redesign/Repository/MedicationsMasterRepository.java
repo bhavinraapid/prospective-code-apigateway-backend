@@ -17,5 +17,13 @@ public interface MedicationsMasterRepository extends JpaRepository<MedicationsMa
             "where cmst.id = :code_id")
     List<CategoryDetails> findCategoryMappingsForMedications(@Param("code_id") int code_id);
 
+    @Query("select new com.example.Redesign.response.TextToCUIResponse(lc.cui, mst.medications, ct.type, mst.id) " +
+            "from MedicationsCui lc " +
+            "join CuiType ct on lc.cuiType = ct.id " +
+            "join MedicationsMaster mst on mst.id = lc.medicationsId " +
+            "where mst.id = :id " +
+            "order by mst.id, lc.cui")
+    List<com.example.Redesign.response.TextToCUIResponse> getMedicationsCUIsByMasterId(@Param("id") Integer id);
+
 
 }

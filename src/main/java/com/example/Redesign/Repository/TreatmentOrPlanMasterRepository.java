@@ -18,4 +18,14 @@ public interface TreatmentOrPlanMasterRepository extends JpaRepository<Treatment
     List<CategoryDetails> findCategoryMappingsForTreatmentOrPlan(@Param("code_id") int code_id);
 
 
+    @Query("select new com.example.Redesign.response.TextToCUIResponse(lc.cui, mst.treatmentOrPlan, ct.type, mst.id) " +
+            "from TreatmentOrPlanCui lc " +
+            "join CuiType ct on lc.cuiType = ct.id " +
+            "join TreatmentOrPlanMaster mst on mst.id = lc.treatmentOrPlanId " +
+            "where mst.id = :id " +
+            "order by mst.id, lc.cui")
+    List<com.example.Redesign.response.TextToCUIResponse> getTreatmentOrPlanCUIsByMasterId(@Param("id") Integer id);
+
+
+
 }

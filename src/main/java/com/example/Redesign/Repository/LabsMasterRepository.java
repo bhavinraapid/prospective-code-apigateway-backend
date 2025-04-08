@@ -19,4 +19,12 @@ public interface LabsMasterRepository extends JpaRepository<LabsMaster, Integer>
             "where cmst.id = :code_id")
     List<CategoryDetails> findCategoryMappingsForLabs(@Param("code_id") int code_id);
 
+    @Query("select new com.example.Redesign.response.TextToCUIResponse(lc.cui, mst.labs, ct.type, mst.id) " +
+            "from LabsCui lc " +
+            "join CuiType ct on lc.cuiType = ct.id " +
+            "join LabsMaster mst on mst.id = lc.labsId " +
+            "where mst.id = :id")
+    List<com.example.Redesign.response.TextToCUIResponse> getLabsCUIsByMasterId(@Param("id") Integer id);
+
+
 }
