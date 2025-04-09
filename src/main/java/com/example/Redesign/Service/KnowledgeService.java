@@ -3,6 +3,10 @@ package com.example.Redesign.Service;
 import com.example.Redesign.DTO.MasterDataItem;
 import com.example.Redesign.Model.*;
 import com.example.Redesign.Repository.*;
+import com.example.Redesign.request.CodeMappingRequest;
+import com.example.Redesign.request.TextToCUIRequest;
+import com.example.Redesign.response.CodeMappingResponse;
+import com.example.Redesign.response.TextToCUIResponse;
 import com.example.Redesign.utility.CodingDbUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,9 +82,9 @@ public class KnowledgeService {
                 System.out.println("We Are here ");
                 return "Code Already Exists in Code master";
             }
-//            CodeMaster code = new CodeMaster();
-//            code.setCode(codeText.trim().toUpperCase());
-//            codeMasterRepository.save(code);
+            CodeMaster code = new CodeMaster();
+            code.setCode(codeText.trim().toUpperCase());
+            codeMasterRepository.save(code);
             return "Code Saved SuccessFully";
         } catch (Exception e) {
             System.out.println("Error While Save to CodeMaster : " + e.getMessage());
@@ -172,5 +176,56 @@ public class KnowledgeService {
 
     private void addCUIMapping(String type, String text) {
         System.out.println("Jay Hind Dosto");
+    }
+
+    public List<TextToCUIResponse> fetchTextToCuis(TextToCUIRequest textToCUIRequest) {
+
+        List<TextToCUIResponse> textToCUIResponseList = new ArrayList<>();
+
+        switch (textToCUIRequest.getType())
+        {
+            case "labs":
+                textToCUIResponseList = labsMasterRepository.getLabsCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
+                 break;
+            case "physicalExam":
+                textToCUIResponseList = physicalExamMasterRepository.getPhysicalExamCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
+                break;
+            case "treatment":
+                textToCUIResponseList = treatmentOrPlanMasterRepository.getTreatmentOrPlanCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
+                break;
+            case "medications":
+                textToCUIResponseList = medicationsMasterRepository.getMedicationsCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
+                break;
+            default:
+                System.out.println("Type Miss match");
+                break;
+        }
+        return textToCUIResponseList;
+    }
+
+    public List<CodeMappingResponse> fetchCodeMappingData(CodeMappingRequest codeMappingRequest) {
+
+        List<CodeMappingResponse> codeMappingResponseList = new ArrayList<>();
+
+        switch (codeMappingRequest.getType())
+        {
+            case "labs":
+                codeMappingResponseList = labsMasterRepository.getLabsCodeMappingData(codeMappingRequest.getCodeMaster().getId(),codeMappingRequest.getMasterDataItem().getId());
+                break;
+            case "physicalExam":
+                codeMappingResponseList = physicalExamMasterRepository.getPhysicalExamCodeMapping(codeMappingRequest.getCodeMaster().getId(),codeMappingRequest.getMasterDataItem().getId());
+                break;
+            case "treatment":
+                codeMappingResponseList = treatmentOrPlanMasterRepository.getTreatmentPlanCodeMapping(codeMappingRequest.getCodeMaster().getId(),codeMappingRequest.getMasterDataItem().getId());
+                break;
+            case "medications":
+                codeMappingResponseList = medicationsMasterRepository.getMedicationCodeMapping(codeMappingRequest.getCodeMaster().getId(),codeMappingRequest.getMasterDataItem().getId());
+                break;
+            default:
+                System.out.println("Type Miss match");
+                break;
+        }
+        return codeMappingResponseList;
+
     }
 }

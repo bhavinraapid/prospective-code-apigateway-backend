@@ -1,11 +1,15 @@
 package com.example.Redesign.Controller;
 
+import com.example.Redesign.DTO.MasterDataItem;
+import com.example.Redesign.Service.KnowledgeService;
+import com.example.Redesign.request.*;
 import com.example.Redesign.response.CodeGroupResponse;
 import com.example.Redesign.Model.CodeMaster;
 import com.example.Redesign.response.CategoryDetails;
 import com.example.Redesign.Service.MajorService;
 import com.example.Redesign.Service.SuspectService;
-import com.example.Redesign.request.GroupRequest;
+import com.example.Redesign.response.CodeMappingResponse;
+import com.example.Redesign.response.TextToCUIResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,9 @@ public class SuspectController {
 
     @Autowired
     private SuspectService suspectService;
+
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     /**
      * Fetches all code masters
@@ -126,13 +133,79 @@ public class SuspectController {
     }
 
     @GetMapping("/codes/{codeId}")
-    public ResponseEntity<String> fetchCodeById(@PathVariable("codeId") Integer codeId) {
+    public ResponseEntity<CodeMaster> fetchCodeById(@PathVariable("codeId") Integer codeId) {
+        System.out.println("We are here : "+codeId);
         try {
-            String code = suspectService.fetchCodeById(codeId);
+            CodeMaster code = suspectService.fetchCodeById(codeId);
+            System.out.println(code);
             return ResponseEntity.ok(code);
         } catch (Exception e) {
             logger.error("Error fetching client list", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
+    @GetMapping("/master-items/{type}")
+    public ResponseEntity<List<MasterDataItem>> fetchMasterItems(@PathVariable("type") String type) {
+        try {
+            List<MasterDataItem> masterDataItemList = knowledgeService.fetchMasterItems(type);
+
+            return ResponseEntity.ok(masterDataItemList);
+        } catch (Exception e) {
+            logger.error("Error fetching client list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
+
+
+    @PostMapping("/codes/addCode")
+    public ResponseEntity<String> addToCodeMaster(@RequestBody CodeRequest codeRequest) {
+        String codeText = codeRequest.getText();
+        if (codeText == null || codeText.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Code text cannot be empty");
+        }
+
+        String msg = knowledgeService.addToCodeMaster(codeText);
+
+
+        return ResponseEntity.ok(msg);
+    }
+
+
+    @PostMapping("/master/add")
+    public ResponseEntity<MasterDataItem> addMasterValue(@RequestBody MasterValueRequest request) {
+        String type = request.getType();
+        String text = request.getText();
+        System.out.println(request);
+        if (type == null || type.trim().isEmpty() || text == null || text.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build(); // No body in bad request
+        }
+
+        MasterDataItem masterDataItem = knowledgeService.addToMaster(type, text.trim().toLowerCase());
+        System.out.println(masterDataItem);
+        System.out.println("=================");
+        return ResponseEntity.ok(masterDataItem);
+    }
+
+
+    @PostMapping("/text-to-cuis")
+    public ResponseEntity<List<TextToCUIResponse>> fetchTextToCuis(@RequestBody TextToCUIRequest textToCUIRequest) {
+        System.out.println("Type: " + textToCUIRequest.getType());
+        System.out.println("Item: " + textToCUIRequest.getMasterDataItem());
+        List<TextToCUIResponse>  textToCUIResponseList = knowledgeService.fetchTextToCuis(textToCUIRequest);
+        System.out.println("Response at Line 200 : "+textToCUIResponseList);
+        return ResponseEntity.ok(textToCUIResponseList);
+    }
+
+
+    @PostMapping("/code-mapping-data")
+    public List<CodeMappingResponse> getCodeMappingData(@RequestBody CodeMappingRequest codeMappingRequest) {
+        List<CodeMappingResponse> codeMappingResponseList =  knowledgeService.fetchCodeMappingData(codeMappingRequest);
+
+        System.out.println("Response at Line 209 : "+codeMappingResponseList);
+
+        return codeMappingResponseList;
+    }
+
 }

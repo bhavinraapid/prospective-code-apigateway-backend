@@ -119,8 +119,8 @@ public class SuspectService {
         return clients;
     }
 
-    public String fetchCodeById(Integer id) {
+    public CodeMaster fetchCodeById(Integer id) {
 
-        return String.valueOf(codeMasterRepository.findById(id).get());
+        return codeMasterRepository.findById(id).get();
     }
 }
