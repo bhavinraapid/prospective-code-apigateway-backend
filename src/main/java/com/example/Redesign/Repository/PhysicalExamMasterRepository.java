@@ -2,6 +2,7 @@ package com.example.Redesign.Repository;
 
 import com.example.Redesign.Model.PhysicalExamMaster;
 import com.example.Redesign.response.CategoryDetails;
+import com.example.Redesign.response.CodeMappingResponse;
 import com.example.Redesign.response.TextToCUIResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,19 @@ public interface PhysicalExamMasterRepository extends JpaRepository<PhysicalExam
             "join PhysicalExamMaster mst on mst.id = lc.physicalExamId " +
             "where mst.id = :id")
     List<TextToCUIResponse> getPhysicalExamCUIsByMasterId(@Param("id") Integer id);
+
+    @Query("SELECT new com.example.Redesign.response.CodeMappingResponse(" +
+            "cmst.code, lc.cui, mst.physicalExam, ct.type, cmst.id, mst.id) " +
+            "FROM PhysicalExamCui lc " +
+            "JOIN CuiType ct ON lc.cuiType = ct.id " +
+            "JOIN PhysicalExamMaster mst ON mst.id = lc.physicalExamId " +
+            "JOIN PhysicalExamCodeMapper cmp ON cmp.physicalExamId = mst.id " +
+            "JOIN CodeMaster cmst ON cmp.codeId = cmst.id " +
+            "WHERE cmst.id = :codeId AND mst.id = :masterId")
+    List<CodeMappingResponse> getPhysicalExamCodeMapping(@Param("codeId") Integer codeId,
+                                                             @Param("masterId") Integer masterId);
+
+
 
 
 }
