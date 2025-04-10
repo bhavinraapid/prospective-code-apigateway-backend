@@ -17,6 +17,10 @@ public class GroupRequest {
         return codeId;
     }
 
+    public void setClient(String client) {
+        this.client = client;
+    }
+
     public void setCodeId(Integer codeId) {
         this.codeId = codeId;
     }
