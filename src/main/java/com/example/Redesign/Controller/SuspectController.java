@@ -199,7 +199,7 @@ public class SuspectController {
     }
 
 
-    @PostMapping("/code-mapping-data")
+    @PostMapping("/get/code-mapping-data")
     public List<CodeMappingResponse> getCodeMappingData(@RequestBody CodeMappingRequest codeMappingRequest) {
         List<CodeMappingResponse> codeMappingResponseList =  knowledgeService.fetchCodeMappingData(codeMappingRequest);
 
@@ -207,5 +207,19 @@ public class SuspectController {
 
         return codeMappingResponseList;
     }
+
+
+    @PostMapping("/add/add-code-mapping")
+    public ResponseEntity<String> addCodeMappingCodeMapper(@RequestBody AddCodeMappingRequest addCodeMappingRequest) {
+
+        System.out.println("AddCodeMappingRequest : "+addCodeMappingRequest);
+
+        String response = knowledgeService.addCodeMappingCodeMapper(addCodeMappingRequest);
+
+        return ResponseEntity.ok("Mapping saved successfully");
+    }
+
+
+
 
 }

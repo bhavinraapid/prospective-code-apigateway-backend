@@ -9,40 +9,40 @@ public class TreatmentOrPlanCodeMapper {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "code_id", nullable = false)
-    private Long codeId;
+    private Integer codeId;
 
     @Column(name = "treatment_or_plan_id", nullable = false)
-    private Long treatmentOrPlanId;
+    private Integer treatmentOrPlanId;
 
     @Column(name = "is_major", nullable = false)
     private Boolean isMajor;
 
     // Getters and Setters
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getCodeId() {
+    public Integer getCodeId() {
         return codeId;
     }
 
-    public void setCodeId(Long codeId) {
+    public void setCodeId(Integer codeId) {
         this.codeId = codeId;
     }
 
-    public Long getTreatmentOrPlanId() {
+    public Integer getTreatmentOrPlanId() {
         return treatmentOrPlanId;
     }
 
-    public void setTreatmentOrPlanId(Long treatmentOrPlanId) {
+    public void setTreatmentOrPlanId(Integer treatmentOrPlanId) {
         this.treatmentOrPlanId = treatmentOrPlanId;
     }
 
@@ -52,5 +52,15 @@ public class TreatmentOrPlanCodeMapper {
 
     public void setIsMajor(Boolean isMajor) {
         this.isMajor = isMajor;
+    }
+
+    @Override
+    public String toString() {
+        return "TreatmentOrPlanCodeMapper{" +
+                "id=" + id +
+                ", codeId=" + codeId +
+                ", treatmentOrPlanId=" + treatmentOrPlanId +
+                ", isMajor=" + isMajor +
+                '}';
     }
 }

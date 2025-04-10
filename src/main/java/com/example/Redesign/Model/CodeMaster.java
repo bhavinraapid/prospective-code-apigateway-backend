@@ -32,4 +32,12 @@ public class CodeMaster implements Serializable {
     public void setCode(String code) {
         this.code = code;
     }
+
+    @Override
+    public String toString() {
+        return "CodeMaster{" +
+                "Id=" + Id +
+                ", code='" + code + '\'' +
+                '}';
+    }
 }

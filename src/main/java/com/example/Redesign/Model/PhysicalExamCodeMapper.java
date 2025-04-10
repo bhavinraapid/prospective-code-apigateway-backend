@@ -9,13 +9,13 @@ public class PhysicalExamCodeMapper {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "code_id", nullable = false)
-    private Long codeId;
+    private Integer codeId;
 
     @Column(name = "physical_exam_id", nullable = false)
-    private Long physicalExamId;
+    private Integer physicalExamId;
 
     @Column(name = "is_major")
     private Boolean isMajor;
@@ -28,27 +28,27 @@ public class PhysicalExamCodeMapper {
 
     // Getters and Setters
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getCodeId() {
+    public Integer getCodeId() {
         return codeId;
     }
 
-    public void setCodeId(Long codeId) {
+    public void setCodeId(Integer codeId) {
         this.codeId = codeId;
     }
 
-    public Long getPhysicalExamId() {
+    public Integer getPhysicalExamId() {
         return physicalExamId;
     }
 
-    public void setPhysicalExamId(Long physicalExamId) {
+    public void setPhysicalExamId(Integer physicalExamId) {
         this.physicalExamId = physicalExamId;
     }
 
@@ -74,5 +74,17 @@ public class PhysicalExamCodeMapper {
 
     public void setGenderCategory(String genderCategory) {
         this.genderCategory = genderCategory;
+    }
+
+    @Override
+    public String toString() {
+        return "PhysicalExamCodeMapper{" +
+                "id=" + id +
+                ", codeId=" + codeId +
+                ", physicalExamId=" + physicalExamId +
+                ", isMajor=" + isMajor +
+                ", ageCategory='" + ageCategory + '\'' +
+                ", genderCategory='" + genderCategory + '\'' +
+                '}';
     }
 }

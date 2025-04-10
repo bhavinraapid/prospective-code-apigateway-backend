@@ -12,10 +12,10 @@ public class LabDataCodeMapper {
     private Long id;
 
     @Column(name = "code_id", nullable = false)
-    private Long codeId;
+    private Integer codeId;
 
     @Column(name = "labs", nullable = false)
-    private Long labs;
+    private Integer labs;
 
     @Column(name = "relationship", nullable = false, length = 10)
     private String relationship;
@@ -48,19 +48,19 @@ public class LabDataCodeMapper {
         this.id = id;
     }
 
-    public Long getCodeId() {
+    public Integer getCodeId() {
         return codeId;
     }
 
-    public void setCodeId(Long codeId) {
+    public void setCodeId(Integer codeId) {
         this.codeId = codeId;
     }
 
-    public Long getLabs() {
+    public Integer getLabs() {
         return labs;
     }
 
-    public void setLabs(Long labs) {
+    public void setLabs(Integer labs) {
         this.labs = labs;
     }
 
@@ -118,5 +118,21 @@ public class LabDataCodeMapper {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public String toString() {
+        return "LabDataCodeMapper{" +
+                "id=" + id +
+                ", codeId=" + codeId +
+                ", labs=" + labs +
+                ", relationship='" + relationship + '\'' +
+                ", value1=" + value1 +
+                ", value2=" + value2 +
+                ", exceptValue=" + exceptValue +
+                ", unit=" + unit +
+                ", isMajor=" + isMajor +
+                ", comment='" + comment + '\'' +
+                '}';
     }
 }
