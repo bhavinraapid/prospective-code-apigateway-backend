@@ -111,6 +111,7 @@ public class MajorService {
 
         try {
             majorMasterRepository.deleteByCodeIdAndGroupId(codeId, groupId);
+            System.out.println("Deleted group with Group ID: "+groupId+" and Code ID: "+codeId);
             logger.info("Deleted group with Group ID: {} and Code ID: {}", groupId, codeId);
         } catch (Exception e) {
             logger.error("Error deleting group with Group ID: {} and Code ID: {}", groupId, codeId, e);

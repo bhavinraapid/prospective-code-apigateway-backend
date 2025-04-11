@@ -3,16 +3,21 @@ package com.example.Redesign.Service;
 import com.example.Redesign.DTO.MasterDataItem;
 import com.example.Redesign.Model.*;
 import com.example.Redesign.Repository.*;
-import com.example.Redesign.request.AddCodeMappingRequest;
-import com.example.Redesign.request.CodeMappingRequest;
-import com.example.Redesign.request.Payload;
-import com.example.Redesign.request.TextToCUIRequest;
+import com.example.Redesign.request.*;
 import com.example.Redesign.response.CodeMappingResponse;
+import com.example.Redesign.response.CuiResponse;
 import com.example.Redesign.response.TextToCUIResponse;
 import com.example.Redesign.utility.CodingDbUtility;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,8 +28,11 @@ import java.util.stream.Collectors;
 @Service
 public class KnowledgeService {
 
+    @Value("${cui.api.url}")
+    private String cuiApiUrl;
+
     @Autowired
-    private CodeMasterRepository codeMasterRepository;
+    private RestTemplate restTemplate;
 
     @Autowired
     private ClientMasterRepository clientMasterRepository;
@@ -36,26 +44,31 @@ public class KnowledgeService {
     private CodingDbUtility codingDbUtility;
 
     @Autowired
-    private LabsMasterRepository labsMasterRepository;
+    private LabsCuiRepository labsCuiRepository;
+    @Autowired
+    private TreatmentOrPlanCuiRepository treatmentOrPlanCuiRepository;
+    @Autowired
+    private PhysicalExamCuiRepository physicalExamCuiRepository;
+    @Autowired
+    private MedicationsCuiRepository medicationsCuiRepository;
 
+    @Autowired
+    private CodeMasterRepository codeMasterRepository;
+    @Autowired
+    private LabsMasterRepository labsMasterRepository;
     @Autowired
     private PhysicalExamMasterRepository physicalExamMasterRepository;
-
     @Autowired
     private MedicationsMasterRepository medicationsMasterRepository;
-
     @Autowired
     private TreatmentOrPlanMasterRepository treatmentOrPlanMasterRepository;
 
     @Autowired
     private LabDataCodeMapperRepository labDataCodeMapperRepository;
-
     @Autowired
     private PhysicalExamCodeMapperRepository physicalExamCodeMapperRepository;
-
     @Autowired
     private TreatmentOrPlanCodeMapperRepository treatmentOrPlanCodeMapperRepository;
-
     @Autowired
     private MedicationsCodeMapperRepository medicationsCodeMapperRepository;
 
@@ -66,12 +79,18 @@ public class KnowledgeService {
     @Autowired
     private UnitsRepository unitsRepository;
 
-
+    @Autowired
+    private CuiTypeRepository cuiTypeRepository;
+    private Map<String, Integer> cuiTypeMap = new HashMap<>();
 
     @PostConstruct
     void loadKnowledge()
     {
-
+        List<CuiType> cuiTypeList = cuiTypeRepository.findAll();
+        for(CuiType cuiType : cuiTypeList)
+        {
+            cuiTypeMap.put(cuiType.getType(), cuiType.getId());
+        }
 
     }
 
@@ -124,8 +143,9 @@ public class KnowledgeService {
         }
     }
 
-    public MasterDataItem addToMaster(String type, String text) {
+    public MasterDataItem addToMaster(String type, String term) {
 
+        String text = term.strip().toLowerCase();
         switch (type) {
             case "labs":
                 Integer existingKey = codingDbUtility.getLabsMasterMap().entrySet()
@@ -137,11 +157,46 @@ public class KnowledgeService {
 
                 if (existingKey != null) {
                     return new MasterDataItem(existingKey, codingDbUtility.getLabsMasterMap().get(existingKey));
-                } else {
+                }
+                else {
+                    // Find CUI for this Term
+                    CuiResponse cuiResponse = fetchCUIforTerm("labs", text);
+                    if(cuiResponse == null)
+                    {
+                        System.out.println("We are not able to fetch CUIs ");
+                        return new MasterDataItem(-1,"Not Added ");
+                    }
+
                     LabsMaster labsMaster = new LabsMaster();
                     labsMaster.setLabs(text);
                     labsMasterRepository.save(labsMaster);
-                    addCUIMapping(type, text);
+
+                    if(cuiResponse.getCuis().get("direct").isEmpty())
+                    {
+                        LabsCui labsCui = new LabsCui();
+                        labsCui.setCuiType(1);
+                        labsCui.setCui("NotFound");
+                        labsCui.setLabsId(labsMaster.getId());
+                        labsCuiRepository.save(labsCui);
+                        return new MasterDataItem(labsMaster.getId(), labsMaster.getLabs());
+                    }
+
+                    for(Map.Entry<String, List<String>> entry : cuiResponse.getCuis().entrySet())
+                    {
+                        Integer cui_type = cuiTypeMap.get(entry.getKey());
+                        if(cui_type == null)
+                            continue;
+
+                        for(String cui : entry.getValue())
+                        {
+                            LabsCui labsCui = new LabsCui();
+                            labsCui.setCuiType(cui_type);
+                            labsCui.setCui(cui);
+                            labsCui.setLabsId(labsMaster.getId());
+                            labsCuiRepository.save(labsCui);
+                        }
+                    }
+
                     return new MasterDataItem(labsMaster.getId(), labsMaster.getLabs());
                 }
 
@@ -155,11 +210,46 @@ public class KnowledgeService {
 
                 if (existingKey1 != null) {
                     return new MasterDataItem(existingKey1, codingDbUtility.getPhysicalExamMasterMap().get(existingKey1));
-                } else {
+                }
+                else {
+
+                    // Find CUI for this Term
+                    CuiResponse cuiResponse = fetchCUIforTerm("physical_exam", text);
+                    if(cuiResponse == null)
+                    {
+                        System.out.println("We are not able to fetch CUIs ");
+                        return new MasterDataItem(-1,"Not Added ");
+                    }
+
                     PhysicalExamMaster physicalExamMaster = new PhysicalExamMaster();
                     physicalExamMaster.setPhysicalExam(text);
                     physicalExamMasterRepository.save(physicalExamMaster);
-                    addCUIMapping(type, text);
+
+                    if(cuiResponse.getCuis().get("direct").isEmpty())
+                    {
+                        PhysicalExamCui physicalExamCui = new PhysicalExamCui();
+                        physicalExamCui.setCui("NotFound");
+                        physicalExamCui.setCuiType(1);
+                        physicalExamCui.setPhysicalExamId(physicalExamMaster.getId());
+                        physicalExamCuiRepository.save(physicalExamCui);
+                        return new MasterDataItem(physicalExamMaster.getId(), physicalExamMaster.getPhysicalExam());
+                    }
+                    for(Map.Entry<String, List<String>> entry : cuiResponse.getCuis().entrySet())
+                    {
+                        Integer cui_type = cuiTypeMap.get(entry.getKey());
+                        if(cui_type == null)
+                            continue;
+
+                        for(String cui : entry.getValue())
+                        {
+                            PhysicalExamCui physicalExamCui = new PhysicalExamCui();
+                            physicalExamCui.setCui(cui);
+                            physicalExamCui.setCuiType(cui_type);
+                            physicalExamCui.setPhysicalExamId(physicalExamMaster.getId());
+                            physicalExamCuiRepository.save(physicalExamCui);
+                        }
+                    }
+
                     return new MasterDataItem(physicalExamMaster.getId(), physicalExamMaster.getPhysicalExam());
                 }
 
@@ -173,11 +263,47 @@ public class KnowledgeService {
 
                 if (existingKey2 != null) {
                     return new MasterDataItem(existingKey2, codingDbUtility.getTreatmentOrPlanMasterMap().get(existingKey2));
-                } else {
+                }
+                else {
+                    // Find CUI for this Term
+                    CuiResponse cuiResponse = fetchCUIforTerm("treatment_or_plan", text);
+                    if(cuiResponse == null)
+                    {
+                        System.out.println("We are not able to fetch CUIs ");
+                        return new MasterDataItem(-1,"Not Added ");
+                    }
+
                     TreatmentOrPlanMaster treatmentOrPlanMaster = new TreatmentOrPlanMaster();
                     treatmentOrPlanMaster.setTreatmentOrPlan(text);
                     treatmentOrPlanMasterRepository.save(treatmentOrPlanMaster);
-                    addCUIMapping(type, text);
+
+                    if(cuiResponse.getCuis().get("direct").isEmpty())
+                    {
+                        TreatmentOrPlanCui treatmentOrPlanCui = new TreatmentOrPlanCui();
+                        treatmentOrPlanCui.setCui("NotFound");
+                        treatmentOrPlanCui.setCuiType(1);
+                        treatmentOrPlanCui.setTreatmentOrPlanId(treatmentOrPlanMaster.getId());
+                        treatmentOrPlanCuiRepository.save(treatmentOrPlanCui);
+                        return new MasterDataItem(treatmentOrPlanMaster.getId(), treatmentOrPlanMaster.getTreatmentOrPlan());
+                    }
+
+                    for(Map.Entry<String, List<String>> entry : cuiResponse.getCuis().entrySet())
+                    {
+                        Integer cui_type = cuiTypeMap.get(entry.getKey());
+                        if(cui_type == null)
+                            continue;
+
+                        for(String cui : entry.getValue())
+                        {
+                            TreatmentOrPlanCui treatmentOrPlanCui = new TreatmentOrPlanCui();
+                            treatmentOrPlanCui.setCui(cui);
+                            treatmentOrPlanCui.setCuiType(cui_type);
+                            treatmentOrPlanCui.setTreatmentOrPlanId(treatmentOrPlanMaster.getId());
+                            treatmentOrPlanCuiRepository.save(treatmentOrPlanCui);
+                        }
+                    }
+
+
                     return new MasterDataItem(treatmentOrPlanMaster.getId(), treatmentOrPlanMaster.getTreatmentOrPlan());
                 }
 
@@ -191,11 +317,47 @@ public class KnowledgeService {
 
                 if (existingKey3 != null) {
                     return new MasterDataItem(existingKey3, codingDbUtility.getMedicationsMasterMap().get(existingKey3));
-                } else {
+                }
+                else {
+                    // Find CUI for this Term
+                    CuiResponse cuiResponse = fetchCUIforTerm("medications", text);
+                    if(cuiResponse == null)
+                    {
+                        System.out.println("We are not able to fetch CUIs ");
+                        return new MasterDataItem(-1,"Not Added ");
+                    }
+
                     MedicationsMaster medicationsMaster = new MedicationsMaster();
                     medicationsMaster.setMedications(text);
                     medicationsMasterRepository.save(medicationsMaster);
-                    addCUIMapping(type, text);
+
+                    if(cuiResponse.getCuis().get("direct").isEmpty())
+                    {
+                        MedicationsCui medicationsCui = new MedicationsCui();
+                        medicationsCui.setCui("NotFound");
+                        medicationsCui.setCuiType(1);
+                        medicationsCui.setMedicationsId(medicationsMaster.getId());
+                        medicationsCuiRepository.save(medicationsCui);
+                        return new MasterDataItem(medicationsMaster.getId(), medicationsMaster.getMedications());
+                    }
+
+                    for(Map.Entry<String, List<String>> entry : cuiResponse.getCuis().entrySet())
+                    {
+                        Integer cui_type = cuiTypeMap.get(entry.getKey());
+                        if(cui_type == null)
+                            continue;
+
+                        for(String cui : entry.getValue())
+                        {
+                            MedicationsCui medicationsCui = new MedicationsCui();
+                            medicationsCui.setCui(cui);
+                            medicationsCui.setCuiType(cui_type);
+                            medicationsCui.setMedicationsId(medicationsMaster.getId());
+                            medicationsCuiRepository.save(medicationsCui);
+                        }
+                    }
+
+
                     return new MasterDataItem(medicationsMaster.getId(), medicationsMaster.getMedications());
                 }
 
@@ -206,9 +368,26 @@ public class KnowledgeService {
         return new MasterDataItem();
     }
 
-    private void addCUIMapping(String type, String text) {
-        System.out.println("Jay Hind Dosto");
+    private CuiResponse fetchCUIforTerm(String type, String text) {
+
+        CuiRequest cuiRequest = new CuiRequest(text, type);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        HttpEntity<CuiRequest> entity = new HttpEntity<>(cuiRequest, headers);
+
+        try {
+            ResponseEntity<CuiResponse> response = restTemplate.postForEntity(cuiApiUrl, entity, CuiResponse.class);
+            return response.getBody();
+        } catch (Exception e) {
+            // Optional: Log the error for debugging
+            System.err.println("Error occurred while fetching CUI mapping: " + e.getMessage());
+            return null;
+        }
     }
+
 
     public List<TextToCUIResponse> fetchTextToCuis(TextToCUIRequest textToCUIRequest) {
 
@@ -405,4 +584,57 @@ public class KnowledgeService {
         return "Mapping saved successfully";
     }
 
+    public String deleteCodeMappingData(CodeMappingRequest codeMappingRequest) {
+
+        Integer codeId = codeMappingRequest.getCodeMaster().getId();
+        Integer masterId = codeMappingRequest.getMasterDataItem().getId();
+
+        String message;
+
+        try {
+            switch (codeMappingRequest.getType()) {
+                case "labs":
+                    LabDataCodeMapper labDataCodeMapper = labDataCodeMapperRepository.findByCodeIdAndLabs(codeId, masterId);
+                    if (labDataCodeMapper != null) {
+                        labDataCodeMapperRepository.delete(labDataCodeMapper);
+                    }
+                    break;
+
+                case "physicalExam":
+                    System.out.println("We are here ");
+                    PhysicalExamCodeMapper physicalExamCodeMapper = physicalExamCodeMapperRepository.findByCodeIdAndPhysicalExamId(codeId, masterId);
+                    System.out.println("Get Data : "+physicalExamCodeMapper);
+                    if (physicalExamCodeMapper != null) {
+                        physicalExamCodeMapperRepository.delete(physicalExamCodeMapper);
+                    }
+                    break;
+
+                case "treatment":
+                    TreatmentOrPlanCodeMapper treatmentOrPlanCodeMapper = treatmentOrPlanCodeMapperRepository.findByCodeIdAndTreatmentOrPlanId(codeId, masterId);
+                    if (treatmentOrPlanCodeMapper != null) {
+                        treatmentOrPlanCodeMapperRepository.delete(treatmentOrPlanCodeMapper);
+                    }
+                    break;
+
+                case "medications":
+                    MedicationsCodeMapper medicationsCodeMapper = medicationsCodeMapperRepository.findByCodeIdAndMedicationsId(codeId, masterId);
+                    if (medicationsCodeMapper != null) {
+                        medicationsCodeMapperRepository.delete(medicationsCodeMapper);
+                    }
+                    break;
+
+                default:
+                    System.out.println("Type mismatch");
+                    return "Invalid type";
+            }
+
+            message = "Deleted successfully";
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Optional: log the error
+            message = "Failed to delete mapping due to error: " + e.getMessage();
+        }
+
+        return message;
+    }
 }

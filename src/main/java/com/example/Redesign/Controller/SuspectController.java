@@ -113,6 +113,7 @@ public class SuspectController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error deleting group with codeId: {} and groupId: {}", codeId, groupId, e);
+            response.put("failed", "false");
             response.put("error", "Failed to delete group");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -179,7 +180,7 @@ public class SuspectController {
         String text = request.getText();
         System.out.println(request);
         if (type == null || type.trim().isEmpty() || text == null || text.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build(); // No body in bad request
+            return ResponseEntity.ok(new MasterDataItem(-1,"")); // No body in bad request
         }
 
         MasterDataItem masterDataItem = knowledgeService.addToMaster(type, text.trim().toLowerCase());
@@ -189,7 +190,7 @@ public class SuspectController {
     }
 
 
-    @PostMapping("/text-to-cuis")
+    @PostMapping("/fetch/text-to-cuis")
     public ResponseEntity<List<TextToCUIResponse>> fetchTextToCuis(@RequestBody TextToCUIRequest textToCUIRequest) {
         System.out.println("Type: " + textToCUIRequest.getType());
         System.out.println("Item: " + textToCUIRequest.getMasterDataItem());
@@ -209,6 +210,16 @@ public class SuspectController {
     }
 
 
+    @PostMapping("/delete/code-mapping-data")
+    public String deleteCodeMappingData(@RequestBody CodeMappingRequest codeMappingRequest) {
+        String codeMappingResponseList =  knowledgeService.deleteCodeMappingData(codeMappingRequest);
+
+        System.out.println("Response at Line 209 : "+codeMappingResponseList);
+
+        return codeMappingResponseList;
+    }
+
+
     @PostMapping("/add/add-code-mapping")
     public ResponseEntity<String> addCodeMappingCodeMapper(@RequestBody AddCodeMappingRequest addCodeMappingRequest) {
 
@@ -219,6 +230,10 @@ public class SuspectController {
         return ResponseEntity.ok("Mapping saved successfully");
     }
 
+    @GetMapping("/health")
+    public String healthCheck() {
+        return "Backend is healthy ✅";
+    }
 
 
 
