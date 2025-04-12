@@ -189,6 +189,13 @@ public class SuspectController {
         return ResponseEntity.ok(masterDataItem);
     }
 
+    @DeleteMapping
+    public ResponseEntity<String> deleteMasterValue(@RequestBody DeleteItemRequest deleteItemRequest)
+    {
+        System.out.println(deleteItemRequest.toString());
+        return ResponseEntity.ok( "We should not delete from master taable");
+    }
+
 
     @PostMapping("/fetch/text-to-cuis")
     public ResponseEntity<List<TextToCUIResponse>> fetchTextToCuis(@RequestBody TextToCUIRequest textToCUIRequest) {
