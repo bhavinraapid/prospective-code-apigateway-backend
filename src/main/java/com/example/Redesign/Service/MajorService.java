@@ -64,7 +64,6 @@ public class MajorService {
                 String groupClient = entry.getValue().getFirst().getClient();
                 codeGroupResponseList.add(new CodeGroupResponse(entry.getKey(), entry.getValue(), groupClient));
             }
-            System.out.println("Major Service Line Number 72 : " + codeGroupResponseList);
             return codeGroupResponseList;
         }
         catch (Exception e) {
@@ -111,7 +110,6 @@ public class MajorService {
 
         try {
             majorMasterRepository.deleteByCodeIdAndGroupId(codeId, groupId);
-            System.out.println("Deleted group with Group ID: "+groupId+" and Code ID: "+codeId);
             logger.info("Deleted group with Group ID: {} and Code ID: {}", groupId, codeId);
         } catch (Exception e) {
             logger.error("Error deleting group with Group ID: {} and Code ID: {}", groupId, codeId, e);
@@ -174,7 +172,7 @@ public class MajorService {
 
             try {
                 majorMasterRepository.save(majorMaster);
-                logger.info("Saved MajorMaster entry: {}", majorMaster);
+//                logger.info("Saved MajorMaster entry: {}", majorMaster);
             } catch (Exception e) {
                 logger.error("Error saving MajorMaster entry: {}", majorMaster, e);
             }

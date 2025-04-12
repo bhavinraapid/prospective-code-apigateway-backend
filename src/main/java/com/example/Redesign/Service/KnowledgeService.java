@@ -15,6 +15,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class KnowledgeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(KnowledgeService.class);
+
 
     @Value("${cui.api.url}")
     private String cuiApiUrl;
@@ -120,7 +125,7 @@ public class KnowledgeService {
                         .collect(Collectors.toList());
                 break;
             default:
-                System.out.println("Type Miss match");
+                logger.error("Type mismatch in fetchMasterItems");
                 break;
         }
         return masterDataItemList;
@@ -128,9 +133,9 @@ public class KnowledgeService {
 
     public String addToCodeMaster(String codeText) {
         try {
-            System.out.println(codeText.trim().toUpperCase());
+            logger.info(codeText.trim().toUpperCase());
             if (codingDbUtility.getCodeMasterMap().containsValue(codeText.toUpperCase())) {
-                System.out.println("We Are here ");
+                logger.info("Duplicate code found in code master");
                 return "Code Already Exists in Code master";
             }
             CodeMaster code = new CodeMaster();
@@ -138,7 +143,7 @@ public class KnowledgeService {
             codeMasterRepository.save(code);
             return "Code Saved SuccessFully";
         } catch (Exception e) {
-            System.out.println("Error While Save to CodeMaster : " + e.getMessage());
+            logger.info("Error While Save to CodeMaster : " + e.getMessage());
             return "Code is Not Saved Succesfully";
         }
     }
@@ -163,7 +168,7 @@ public class KnowledgeService {
                     CuiResponse cuiResponse = fetchCUIforTerm("labs", text);
                     if(cuiResponse == null)
                     {
-                        System.out.println("We are not able to fetch CUIs ");
+                        logger.info("We are not able to fetch CUIs ");
                         return new MasterDataItem(-1,"Not Added ");
                     }
 
@@ -217,7 +222,7 @@ public class KnowledgeService {
                     CuiResponse cuiResponse = fetchCUIforTerm("physical_exam", text);
                     if(cuiResponse == null)
                     {
-                        System.out.println("We are not able to fetch CUIs ");
+                        logger.info("We are not able to fetch CUIs ");
                         return new MasterDataItem(-1,"Not Added ");
                     }
 
@@ -269,7 +274,7 @@ public class KnowledgeService {
                     CuiResponse cuiResponse = fetchCUIforTerm("treatment_or_plan", text);
                     if(cuiResponse == null)
                     {
-                        System.out.println("We are not able to fetch CUIs ");
+                        logger.info("We are not able to fetch CUIs ");
                         return new MasterDataItem(-1,"Not Added ");
                     }
 
@@ -323,7 +328,7 @@ public class KnowledgeService {
                     CuiResponse cuiResponse = fetchCUIforTerm("medications", text);
                     if(cuiResponse == null)
                     {
-                        System.out.println("We are not able to fetch CUIs ");
+                        logger.info("We are not able to fetch CUIs ");
                         return new MasterDataItem(-1,"Not Added ");
                     }
 
@@ -362,7 +367,7 @@ public class KnowledgeService {
                 }
 
             default:
-                System.out.println("Type Miss match");
+                logger.error("Type mismatch in addToMaster");
                 break;
         }
         return new MasterDataItem();
@@ -383,7 +388,7 @@ public class KnowledgeService {
             return response.getBody();
         } catch (Exception e) {
             // Optional: Log the error for debugging
-            System.err.println("Error occurred while fetching CUI mapping: " + e.getMessage());
+            logger.error("Error occurred while fetching CUI mapping: " + e.getMessage());
             return null;
         }
     }
@@ -397,7 +402,7 @@ public class KnowledgeService {
         {
             case "labs":
                 textToCUIResponseList = labsMasterRepository.getLabsCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
-                 break;
+                break;
             case "physicalExam":
                 textToCUIResponseList = physicalExamMasterRepository.getPhysicalExamCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
                 break;
@@ -408,7 +413,7 @@ public class KnowledgeService {
                 textToCUIResponseList = medicationsMasterRepository.getMedicationsCUIsByMasterId(textToCUIRequest.getMasterDataItem().getId());
                 break;
             default:
-                System.out.println("Type Miss match");
+                logger.error("Type mismatch in fetchTextToCuis");
                 break;
         }
         return textToCUIResponseList;
@@ -433,7 +438,7 @@ public class KnowledgeService {
                 codeMappingResponseList = medicationsMasterRepository.getMedicationCodeMapping(codeMappingRequest.getCodeMaster().getId(),codeMappingRequest.getMasterDataItem().getId());
                 break;
             default:
-                System.out.println("Type Miss match");
+                logger.error("Type mismatch in fetchCodeMappingData");
                 break;
         }
         return codeMappingResponseList;
@@ -467,7 +472,7 @@ public class KnowledgeService {
 
     private String handleLabsMapping(Integer codeId, Integer masterId, Payload payload) {
         if (labDataCodeMapperRepository.findByCodeIdAndLabs(codeId, masterId) != null) {
-            System.out.println("Mapping already exists");
+            logger.info("Mapping already exists");
             return "Mapping already exists";
         }
 
@@ -529,13 +534,13 @@ public class KnowledgeService {
         }
 
         labDataCodeMapperRepository.save(mapper);
-        System.out.println("New Mapper is : "+mapper);
+        logger.info("New Mapper is : "+mapper);
         return "Mapping saved successfully";
     }
 
     private String handlePhysicalExamMapping(Integer codeId, Integer masterId) {
         if (physicalExamCodeMapperRepository.findByCodeIdAndPhysicalExamId(codeId, masterId) != null) {
-            System.out.println("Mapping already exists");
+            logger.info("Mapping already exists");
             return "Mapping already exists";
         }
 
@@ -548,13 +553,13 @@ public class KnowledgeService {
 
 
         physicalExamCodeMapperRepository.save(mapper);
-        System.out.println("New Mapper is : "+mapper);
+        logger.info("New Mapper is : "+mapper);
         return "Mapping saved successfully";
     }
 
     private String handleTreatmentMapping(Integer codeId, Integer masterId) {
         if (treatmentOrPlanCodeMapperRepository.findByCodeIdAndTreatmentOrPlanId(codeId, masterId) != null) {
-            System.out.println("Mapping already exists");
+            logger.info("Mapping already exists");
             return "Mapping already exists";
         }
 
@@ -564,13 +569,13 @@ public class KnowledgeService {
         mapper.setIsMajor(false);
 
         treatmentOrPlanCodeMapperRepository.save(mapper);
-        System.out.println("New Mapper is : "+mapper);
+        logger.info("New Mapper is : "+mapper);
         return "Mapping saved successfully";
     }
 
     private String handleMedicationsMapping(Integer codeId, Integer masterId) {
         if (medicationsCodeMapperRepository.findByCodeIdAndMedicationsId(codeId, masterId) != null) {
-            System.out.println("Mapping already exists");
+            logger.info("Mapping already exists");
             return "Mapping already exists";
         }
 
@@ -580,7 +585,7 @@ public class KnowledgeService {
         mapper.setIsMajor(false);
 
         medicationsCodeMapperRepository.save(mapper);
-        System.out.println("New Mapper is : "+mapper);
+        logger.info("New Mapper is : "+mapper);
         return "Mapping saved successfully";
     }
 
@@ -598,15 +603,15 @@ public class KnowledgeService {
                     if (labDataCodeMapper != null) {
                         labDataCodeMapperRepository.delete(labDataCodeMapper);
                     }
+                    logger.info("deleted Code mapper successfully : {}",labDataCodeMapper);
                     break;
 
                 case "physicalExam":
-                    System.out.println("We are here ");
                     PhysicalExamCodeMapper physicalExamCodeMapper = physicalExamCodeMapperRepository.findByCodeIdAndPhysicalExamId(codeId, masterId);
-                    System.out.println("Get Data : "+physicalExamCodeMapper);
                     if (physicalExamCodeMapper != null) {
                         physicalExamCodeMapperRepository.delete(physicalExamCodeMapper);
                     }
+                    logger.info("deleted Code mapper successfully : {}",physicalExamCodeMapper);
                     break;
 
                 case "treatment":
@@ -614,6 +619,7 @@ public class KnowledgeService {
                     if (treatmentOrPlanCodeMapper != null) {
                         treatmentOrPlanCodeMapperRepository.delete(treatmentOrPlanCodeMapper);
                     }
+                    logger.info("deleted Code mapper successfully : {}",treatmentOrPlanCodeMapper);
                     break;
 
                 case "medications":
@@ -621,17 +627,18 @@ public class KnowledgeService {
                     if (medicationsCodeMapper != null) {
                         medicationsCodeMapperRepository.delete(medicationsCodeMapper);
                     }
+                    logger.info("deleted Code mapper successfully : {}",medicationsCodeMapper);
                     break;
 
                 default:
-                    System.out.println("Type mismatch");
+                    logger.error("Type mismatch in deleteCodeMappingData");
                     return "Invalid type";
             }
 
             message = "Deleted successfully";
 
         } catch (Exception e) {
-            e.printStackTrace(); // Optional: log the error
+            logger.error("Exception stack trace:", e); // Optional: log the error
             message = "Failed to delete mapping due to error: " + e.getMessage();
         }
 

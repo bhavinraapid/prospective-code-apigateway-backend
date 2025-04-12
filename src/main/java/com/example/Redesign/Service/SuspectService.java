@@ -52,7 +52,7 @@ public class SuspectService {
             return codeMasters;
         } catch (Exception e) {
             logger.error("Error fetching code masters", e);
-            return Collections.emptyList();
+            throw new RuntimeException("Error fetching code masters", e);  // Rethrow the exception if needed
         }
     }
 
@@ -92,6 +92,7 @@ public class SuspectService {
             }
         } catch (Exception e) {
             logger.error("Error fetching category details for Code ID: {} and Type: {}", codeId, type, e);
+            throw new RuntimeException("Error fetching category details for Code ID: " + codeId + " and Type: " + type, e);  // Rethrow the exception if needed
         }
 
         return categoryDetails;
@@ -114,13 +115,18 @@ public class SuspectService {
             }
         } catch (Exception e) {
             logger.error("Error fetching client names", e);
+            throw new RuntimeException("Error fetching client names", e);  // Rethrow the exception if needed
         }
 
         return clients;
     }
 
     public CodeMaster fetchCodeById(Integer id) {
-
-        return codeMasterRepository.findById(id).get();
+        try {
+            return codeMasterRepository.findById(id).orElseThrow(() -> new RuntimeException("CodeMaster not found with id: " + id));
+        } catch (Exception e) {
+            logger.error("Error fetching CodeMaster by ID: {}", id, e);
+            throw new RuntimeException("Error fetching CodeMaster by ID: " + id, e);  // Rethrow the exception if needed
+        }
     }
 }

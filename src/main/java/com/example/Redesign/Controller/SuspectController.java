@@ -58,7 +58,7 @@ public class SuspectController {
             @PathVariable("type") String type) {
         try {
             List<CategoryDetails> categoryDetails = suspectService.getCategoryDetailsForCode(code, type);
-            logger.info("Fetched category details for type: {}", type);
+//            logger.info("Fetched category details for type: {}", type);
             return ResponseEntity.ok(categoryDetails);
         } catch (Exception e) {
             logger.error("Error fetching category details for code: {} and type: {}", code, type, e);
@@ -135,10 +135,10 @@ public class SuspectController {
 
     @GetMapping("/codes/{codeId}")
     public ResponseEntity<CodeMaster> fetchCodeById(@PathVariable("codeId") Integer codeId) {
-        System.out.println("We are here : "+codeId);
+//        System.out.println("We are here : "+codeId);
         try {
             CodeMaster code = suspectService.fetchCodeById(codeId);
-            System.out.println(code);
+//            System.out.println(code);
             return ResponseEntity.ok(code);
         } catch (Exception e) {
             logger.error("Error fetching client list", e);
@@ -178,31 +178,31 @@ public class SuspectController {
     public ResponseEntity<MasterDataItem> addMasterValue(@RequestBody MasterValueRequest request) {
         String type = request.getType();
         String text = request.getText();
-        System.out.println(request);
+//        System.out.println(request);
         if (type == null || type.trim().isEmpty() || text == null || text.trim().isEmpty()) {
             return ResponseEntity.ok(new MasterDataItem(-1,"")); // No body in bad request
         }
 
         MasterDataItem masterDataItem = knowledgeService.addToMaster(type, text.trim().toLowerCase());
-        System.out.println(masterDataItem);
-        System.out.println("=================");
+//        System.out.println(masterDataItem);
+//        System.out.println("=================");
         return ResponseEntity.ok(masterDataItem);
     }
 
     @DeleteMapping
     public ResponseEntity<String> deleteMasterValue(@RequestBody DeleteItemRequest deleteItemRequest)
     {
-        System.out.println(deleteItemRequest.toString());
+//        System.out.println(deleteItemRequest.toString());
         return ResponseEntity.ok( "We should not delete from master taable");
     }
 
 
     @PostMapping("/fetch/text-to-cuis")
     public ResponseEntity<List<TextToCUIResponse>> fetchTextToCuis(@RequestBody TextToCUIRequest textToCUIRequest) {
-        System.out.println("Type: " + textToCUIRequest.getType());
-        System.out.println("Item: " + textToCUIRequest.getMasterDataItem());
+//        System.out.println("Type: " + textToCUIRequest.getType());
+//        System.out.println("Item: " + textToCUIRequest.getMasterDataItem());
         List<TextToCUIResponse>  textToCUIResponseList = knowledgeService.fetchTextToCuis(textToCUIRequest);
-        System.out.println("Response at Line 200 : "+textToCUIResponseList);
+//        System.out.println("Response at Line 200 : "+textToCUIResponseList);
         return ResponseEntity.ok(textToCUIResponseList);
     }
 
@@ -211,7 +211,7 @@ public class SuspectController {
     public List<CodeMappingResponse> getCodeMappingData(@RequestBody CodeMappingRequest codeMappingRequest) {
         List<CodeMappingResponse> codeMappingResponseList =  knowledgeService.fetchCodeMappingData(codeMappingRequest);
 
-        System.out.println("Response at Line 209 : "+codeMappingResponseList);
+//        System.out.println("Response at Line 209 : "+codeMappingResponseList);
 
         return codeMappingResponseList;
     }
@@ -221,7 +221,7 @@ public class SuspectController {
     public String deleteCodeMappingData(@RequestBody CodeMappingRequest codeMappingRequest) {
         String codeMappingResponseList =  knowledgeService.deleteCodeMappingData(codeMappingRequest);
 
-        System.out.println("Response at Line 209 : "+codeMappingResponseList);
+//        System.out.println("Response at Line 209 : "+codeMappingResponseList);
 
         return codeMappingResponseList;
     }
@@ -230,7 +230,7 @@ public class SuspectController {
     @PostMapping("/add/add-code-mapping")
     public ResponseEntity<String> addCodeMappingCodeMapper(@RequestBody AddCodeMappingRequest addCodeMappingRequest) {
 
-        System.out.println("AddCodeMappingRequest : "+addCodeMappingRequest);
+//        System.out.println("AddCodeMappingRequest : "+addCodeMappingRequest);
 
         String response = knowledgeService.addCodeMappingCodeMapper(addCodeMappingRequest);
 
