@@ -41,6 +41,7 @@ public class SuspectController {
     @GetMapping("/codes")
     public ResponseEntity<List<CodeMaster>> getCodes() {
         try {
+            System.out.println("Request Received");
             List<CodeMaster> codeMasters = suspectService.getCodeMasters();
             return ResponseEntity.ok(codeMasters);
         } catch (Exception e) {
